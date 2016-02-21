@@ -1,0 +1,117 @@
+﻿@Master['Web\\Views\\Master-DataTable.html']
+
+@Section['Title']
+Monitors
+@EndSection
+
+@Section['AdditionalStyle']
+<style type="text/css">
+         
+    #container {
+        padding-top: 60px !important;
+        width: 960px !important;
+    }
+    #dt_example .big {
+        font-size: 1.3em;
+        line-height: 1.45em;
+        color: #111;
+        margin-left: -10px;
+        margin-right: -10px;
+        font-weight: normal;
+    }
+    #dt_example {
+        font: 95%/1.45em "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+        color: #111;
+    }
+    div.dataTables_wrapper, table {
+        font: 13px/1.45em "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+    }
+    #dt_example h1 {
+        font-size: 16px !important;
+        color: #111;
+    }
+    #footer {
+        line-height: 1.45em;
+    }
+    div.examples {
+        padding-top: 1em !important;
+    }
+    div.examples ul {
+        padding-top: 1em !important;
+        padding-left: 1em !important;
+        color: #111;
+    }
+</style>
+@EndSection
+
+
+@Section['Body']
+
+    <TABLE id="example" class="display" border="0" cellSpacing="0" cellPadding="0" width="100%">
+      <thead>
+        <tr>
+            <th width="5">MonitorID</th>
+            <th width="100">Name</th>
+            <th width="200">Description</th>
+            <th width="10">Run Interval</th>
+            <th width="*">SQL</th>
+            <th width="50">Type</th>
+            <th width="40">State</th>
+            <th width="10">Run Multiple</th>
+            <th width="10">Active</th>
+            <th width="10">Alert</th>
+            <th width="100">Email</th>
+            <th width="100">Checkpoint</th>
+        </tr>
+      </thead>
+    </TABLE>
+
+    <script type="text/javascript">
+        var oTable; // use a global for the table
+
+        $(document).ready(function () {
+
+            oTable = $('#example').dataTable({
+                "sDom": "Tfrtip",
+                "sAjaxSource": "/Monitor/dt.json",
+                "aoColumns": [
+                    { "mData": "MonitorID", "sTitle": "ID" },
+                    { "mData": "Name" },
+                    { "mData": "Description" },
+                    { "mData": "RunInterval", "sTitle": "Run Interval", "sClass": "center" },
+                    { "mData": "SQL", "sClass": "centre" },
+                    { "mData": "Type", "sClass": "centre" },
+                    { "mData": "State", "sClass": "center" },
+                    { "mData": "RunMultiple", "sTitle": "Run Multiple", "sClass": "center", "mRender": function (data, type, full) {
+                        if (data == 1) {
+                            return '<input type="checkbox" name="RunMultiple" value="1" checked disabled="">';
+                        } else {
+                            return '<input type="checkbox" name="RunMultiple" value="0" disabled="">';
+                        }
+                    }
+                    },
+
+                    { "mData": "Active", "sClass": "center", "mRender": function (data, type, full) {
+                        if (data == 1) {
+                            return '<input type="checkbox" name="Active" value="1" checked disabled="">';
+                        } else {
+                            return '<input type="checkbox" name="Active" value="0" disabled="">';
+                        }
+                    }
+                    },
+                    { "mData": "Alert", "sClass": "center", "mRender": function (data, type, full) {
+                        if (data == 1) {
+                            return '<input type="checkbox" name="Alert" value="1" checked disabled="">';
+                        } else {
+                            return '<input type="checkbox" name="Alert" value="0" disabled="">';
+                        }
+                    }
+                    },
+                    { "mData": "EmailAddresses", "sTitle": "Email", "sClass": "center" },
+                    { "mData": "Checkpoint", "sClass": "center" }
+                ]
+            });
+
+        });
+    </script>
+@EndSection

@@ -1,0 +1,31 @@
+﻿@Master['Web\\Views\\Master.html']
+
+
+@Section['Body']
+    <table border="1">
+      <tr>
+        <th>Job ID</th>
+        <th>Monitor ID</th>
+        <th>Monitor Name</th>
+        <th>Monitor Type</th>
+        <th>StartTime</th>
+        <th>EndTime</th>
+        <th>FinalState</th>
+        <th>Info</th>
+      </tr>
+      @Each.jobs
+      <tr>
+        <td>
+            <a href="/Job/@Current.JobID">@Current.JobID</a>
+        </td>
+        <td>@Current.MonitorID</td>
+        <td>@Current.Name</td>
+        <td>@Current.Type</td>
+        <td>@Current.StartTime</td>
+        <td>@Current.EndTime</td>
+        <td>@Current.FinalState</td>
+        <td>@Current.Info</td>
+      </tr>
+      @EndEach
+    </table>
+@EndSection

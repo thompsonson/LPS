@@ -1,0 +1,104 @@
+﻿CREATE TABLE Eventvwr (
+        EventvwrID INTEGER PRIMARY KEY ASC,
+        JobID INTEGER,
+        EventLog STRING,
+        RecordNumber INTEGER,
+        TimeGenerated STRING,
+        TimeWritten STRING,
+        EventID STRING,
+        EventType INTEGER,
+        EventTypeName STRING,
+        EventCategory INTEGER,
+        EventCategoryName STRING,
+        SourceName STRING,
+        Strings STRING,
+        ComputerName STRING,
+        SID STRING,
+        Message STRING,
+        Data  STRING
+);
+
+CREATE TABLE IIS (
+		IISID INTEGER PRIMARY KEY ASC,
+		JobID INTEGER,
+		LogFilename STRING,
+		RowNumber  INTEGER,
+		date        STRING,
+		time      STRING,
+		s_ip          STRING,
+		cs_method  STRING,
+		cs_uri_stem       STRING,
+		cs_uri_query  STRING,
+		s_port  INTEGER,
+		cs_username  STRING,
+		c_ip         STRING,
+		cs_User_Agent STRING,
+		sc_status  INTEGER,
+		sc_substatus  INTEGER,
+		sc_win32_status  INTEGER,
+		time_taken INTEGER
+);
+
+CREATE TABLE Job (
+        JobID INTEGER PRIMARY KEY ASC,
+        MonitorID INTEGER,
+        StartTime STRING,
+        EndTime STRING,
+        FinalState STRING,
+		Info STRING,
+        Batch INTEGER,
+		created_ts TIMESTAMP NOT NULL DEFAULT current_timestamp,
+		update_ts TIMESTAMP
+);
+CREATE TABLE Monitor (
+        MonitorID INTEGER PRIMARY KEY ASC,
+        Name STRING,
+        Description STRING,
+        RunInterval INTEGER,
+        SQL STRING,
+        Type STRING,
+        State STRING,
+        RunMultiple INTEGER,
+		Active Integer, 
+		Checkpoint String, 
+		Alert INTEGER, 
+		EmailAddresses STRING,
+		created_ts TIMESTAMP,
+		created_user STRING,
+		update_ts TIMESTAMP,
+		update_user STRING
+);
+
+-- trigger for the update_ts column
+CREATE TRIGGER [Monitor_create_ts]
+	AFTER INSERT
+	ON Monitor
+	FOR EACH ROW
+	BEGIN
+		UPDATE Monitor SET created_ts = CURRENT_TIMESTAMP WHERE RowId = new.RowId;
+	END
+;
+CREATE TRIGGER [Monitor_update_ts]
+	AFTER UPDATE
+	ON Monitor
+	FOR EACH ROW
+	BEGIN
+		UPDATE Monitor SET update_ts = CURRENT_TIMESTAMP WHERE RowId = old.RowId;
+	END
+;
+
+CREATE TRIGGER [Job_update_ts]
+	AFTER UPDATE
+	ON Job
+	FOR EACH ROW
+	BEGIN
+		UPDATE Job SET update_ts = CURRENT_TIMESTAMP WHERE RowId = old.RowId;
+	END
+;
+
+-- insert into Monitor (Name, Description, RunInterval, SQL, Type, State, RunMultiple, Active, Checkpoint) VALUES ("Test", "Test Monitor", 333, "SELECT * from \\SERVER1\CustomEventLog WHERE EventTypeName='Error event'", "Eventvwr", "Created", 0, 0, "");
+-- insert into Monitor (Name, Description, RunInterval, SQL, Type, State, RunMultiple, Active, Checkpoint) VALUES ("Test#2", "Test Monitor #2", 333, "SELECT * from \\SERVER2\Application WHERE EventTypeName='Error event'", "Eventvwr", "Created", 0, 1, "");
+-- insert into Monitor (Name, Description, RunInterval, SQL, Type, State, RunMultiple, Active, Checkpoint) VALUES ("Test Checkpoint", "Monitor to test the check point functionality", 33, "Select top 50 * from \\SERVER3\Security", "Eventvwr", "Created", 0, 0, "test_checkpoint.lpc");
+
+
+

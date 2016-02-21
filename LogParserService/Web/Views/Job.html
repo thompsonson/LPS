@@ -1,0 +1,84 @@
+﻿@Master['Web\\Views\\Master-DataTable.html']
+
+@Section['Title']
+Jobs
+@EndSection
+
+@Section['AdditionalStyle']
+<style type="text/css" title="currentStyle">
+    #container 
+    {
+        padding: 0;
+        width: 1025px;
+    }
+    table.dataTable td.details
+    {
+        border: 0;
+        padding: 5px;
+        background-color: #F5F5F5;
+    }
+    div.innerDetails
+    {
+        display: none;
+    }
+    .top, .bottom 
+    {
+        background-color: #F5F5F5;
+        border: 1px solid #CCCCCC;
+        padding: 25px;
+    }
+</style>
+@EndSection
+
+
+@Section['Body']
+    <div id="container">
+        <TABLE id="jobTable" class="display" border="0" cellSpacing="0" cellPadding="0" width="100%">
+          <thead>
+            <tr>
+                <th width="5px">Job ID</th>
+                <!--<th width="5px">Monitor ID</th>-->
+                <th width="100px">Name</th>
+                <th width="25px">Type</th>
+                <th width="150px">Start Time</th>
+                <th width="150px">End Time</th>
+                <th width="50px">Final State</th>
+                <th width="*">Info</th>
+            </tr>
+          </thead>
+        </TABLE>
+    </div>
+
+    <script type="text/javascript">
+        var oTable; // use a global for the table
+        
+        $(document).ready(function () {
+
+            oTable = $('#jobTable').dataTable({
+                "sDom": '<"top"lf>t<"bottom"irp>',
+                "sAjaxSource": "/Job/dt.json",
+                "aaSorting": [[3, "desc"]],
+                "bPaginate": true,
+                "bLengthChange": true,
+                "sPaginationType": "full_numbers",
+                "aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "bInfo": true,
+                "aoColumns": [
+                    { "mData": "JobID", "sTitle": "Job ID", "sSortDataType": "date-euro", "mRender": function (data, type, full) {
+                        return '<a href="/Job/' + data + '">' + data + '</a>';
+                    } 
+                    },
+                    //{ "mData": "MonitorID", "sTitle": "Monitor ID" },
+                    { "mData": "Name" },
+                    { "mData": "Type" },
+                    { "mData": "StartTime", "sTitle": "Start Time" },
+                    { "mData": "EndTime", "sTitle": "End Time" },
+                    { "mData": "FinalState", "sTitle": "Final State" },
+                    { "mData": "Info" }
+                ]
+            });
+
+
+        });
+    </script>
+@EndSection

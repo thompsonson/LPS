@@ -1,0 +1,7 @@
+﻿
+@If.MasterPage.IsAuthenticated
+    Welcome @Model.MasterPage.Username | <a href="/Monitor">Monitors</a> | <a href="/Job">Jobs</a> | <a href="/Config">Config</a>
+@EndIf
+@IfNot.MasterPage.IsAuthenticated
+    <a href="/login">Login</a>
+@EndIf</p>

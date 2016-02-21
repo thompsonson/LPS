@@ -1,0 +1,168 @@
+﻿@Master['Web\\Views\\Master-DataTable.html'] 
+
+@Section['Title'] Event Viewer View @EndSection
+
+@Section['AdditionalStyle']
+<style type="text/css" title="currentStyle">
+    #container 
+    {
+        padding: 0;
+        width: 1025px;
+    }
+    table.dataTable td.details
+    {
+        border: 0;
+        padding: 5px;
+        background-color: #F5F5F5;
+    }
+    div.innerDetails
+    {
+        display: none;
+    }
+    .top, .bottom 
+    {
+        background-color: #F5F5F5;
+        border: 1px solid #CCCCCC;
+        padding: 25px;
+    }
+</style>
+
+@EndSection 
+
+@Section['Body']
+    <table border="1">
+      <tr>
+        <th>JobID</th>
+        <th>MonitorID</th>
+        <th>Monitor Name</th>
+        <th>Monitor Type</th>
+        <th>StartTime</th>
+        <th>EndTime</th>
+        <th>FinalState</th>
+        <th>Info</th>
+      </tr>
+      <tr>
+        <td>@Model.jobs.JobID</td>
+        <td>@Model.jobs.MonitorID</td>
+        <td>@Model.jobs.Name</td>
+        <td>@Model.jobs.Type</td>
+        <td>@Model.jobs.StartTime</td>
+        <td>@Model.jobs.EndTime</td>
+        <td>@Model.jobs.FinalState</td>
+        <td>@Model.jobs.Info</td>
+      </tr>
+    </table>
+
+    <p><b> Results </b>  - click row for more information </p>
+    <div id="container">
+        <TABLE id="jobTable" >
+          <thead>
+              <tr>
+                <th>Time Generated</th>
+                <th>EventLog</th>
+                <th>Source Name</th>
+                <th>RecordNumber</th>
+                <th>Event ID</th>
+                <th>Computer Name</th>
+                <!--<th>TimeWritten</th>-->
+                <!--<th>EventType</th>-->
+                <!--<th>EventTypeName</th>-->
+                <!--<th>EventCategory</th>-->
+                <!--<th>EventCategoryName</th>-->
+                <!--<th>Strings</th>-->
+                <!--<th>SID</th>-->
+                <!--<th>Message</th>-->
+                <!--<th>Data</th>-->
+              </tr>
+          </thead>
+        </TABLE>
+    </div>
+    <script type="text/javascript">
+        var oTable; // use a global for the table
+        var anOpen = [];
+
+        $(document).ready(function () {
+            oTable = $('#jobTable').dataTable({
+                "sDom": '<"top"lf>t<"bottom"irp>',
+                "sAjaxSource": "/Job/dt/@Model.jobs.Type/"+ @Model.jobs.JobID + ".json",
+                "bPaginate": true,
+                "bLengthChange": true,
+                "sPaginationType": "full_numbers",
+                "aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "bInfo": true,
+                "aoColumns": [
+                    { "mData": "TimeGenerated", "sWidth": "100px"},
+                    { "mData": "EventLog", "sTitle": "Event Log", "sWidth": "50px"},
+                    { "mData": "SourceName", "sWidth": "200px"},
+                    { "mData": "RecordNumber", "sTitle": "Record #", "sWidth": "5px"},
+                    { "mData": "EventID", "sWidth": "50px"},
+                    { "mData": "ComputerName", "sWidth": "100px"}
+                    //{ "mData": "TimeWritten", "sWidth": "50px"},
+                    //{ "mData": "EventType", "sWidth": "25px"},
+                    //{ "mData": "EventTypeName", "sWidth": "100px"},
+                    //{ "mData": "EventCategory", "sWidth": "100px"},
+                    //{ "mData": "EventCategoryName", "sWidth": "10px"},
+                    //{ "mData": "Strings", "sWidth": "25px"},
+                    //{ "mData": "SID", "sWidth": "20px"},
+                    //{ "mData": "Message", "sWidth": "20px"},
+                    //{ "mData": "Data", "sWidth": "20px"}
+                ]
+            });
+        });
+
+        $('#jobTable tbody tr').live( 'click', function () {
+
+            var nTr = this;
+            var i = $.inArray( nTr, anOpen );
+
+            if ( i === -1 ) {
+            $(this).addClass('row_selected');
+            var nDetailsRow = oTable.fnOpen( nTr, fnFormatDetails(oTable, nTr), 'details' );
+            $('div.innerDetails', nDetailsRow).slideDown();
+            anOpen.push( nTr );
+            }
+            else {
+            $(this).removeClass('row_selected');
+            $('div.innerDetails', $(nTr).next()[0]).slideUp( function () {
+            oTable.fnClose( nTr );
+            anOpen.splice( i, 1 );
+            } );
+
+            }
+        } );
+
+        function fnFormatDetails( oTable, nTr )
+        {
+          var oData = oTable.fnGetData( nTr );
+
+          var TimeWritten = (oData.TimeWritten) ? oData.TimeWritten : "&nbsp;";
+
+          var EventType = (oData.EventType) ? oData.EventType : "&nbsp;";
+          var EventTypeName = (oData.EventTypeName) ? oData.EventTypeName : "&nbsp;";
+          var EventCategory = (oData.EventCategory) ? oData.EventCategory : "&nbsp;";
+          var EventCategoryName = (oData.EventCategoryName) ? EventCategoryName : "&nbsp;";
+          
+          var Strings = (oData.Strings) ? oData.Strings : "&nbsp;";
+          var SID = (oData.SID) ? oData.SID : "&nbsp;";
+          var Message = (oData.Message) ? oData.Message : "&nbsp;";
+          var Data = (oData.Data) ? oData.Data : "&nbsp;";
+          
+          var sOut =
+            '<div class="innerDetails" style="padding-left:50px;">'+
+              '<table cellpadding="5" cellspacing="0" border="1" style="padding-left:0px;">'+
+                '<tr><td>Time Written:</td><td COLSPAN="3">'+TimeWritten+'</td></tr>'+
+                '<tr><td>Event Type:</td><td>'+ EventType +'</td><td>Event Type Name:</td><td>'+EventTypeName+'</td></tr>'+
+                '<tr><td>EventCategory:</td><td>'+ EventCategory +'</td><td>EventCategoryName:</td><td>'+EventCategoryName+'</td></tr>'+
+                '<tr><td>Strings:</td><td COLSPAN="3">'+Strings+'</td></tr>'+
+                '<tr><td>SID:</td><td COLSPAN="3">'+SID+'</td></tr>'+
+                '<tr><td>Message:</td><td COLSPAN="3">'+Message+'</td></tr>'+
+                '<tr><td>Data:</td><td COLSPAN="3">'+Data+'</td></tr>'+
+              '</table>'+
+            '</div>';
+          return sOut;
+        }
+
+
+    </script>
+
+@EndSection

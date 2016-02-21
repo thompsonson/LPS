@@ -1,0 +1,193 @@
+﻿@Master['Web\\Views\\Master-DataTable.html'] 
+
+@Section['Title'] Job View @EndSection
+
+@Section['AdditionalStyle']
+<style type="text/css" title="currentStyle">
+    #container 
+    {
+        padding: 0;
+        width: 1025px;
+    }
+    table.dataTable td.details
+    {
+        border: 0;
+        padding: 5px;
+        background-color: #F5F5F5;
+    }
+    div.innerDetails
+    {
+        display: none;
+    }
+    .top, .bottom 
+    {
+        background-color: #F5F5F5;
+        border: 1px solid #CCCCCC;
+        padding: 25px;
+    }
+</style>
+
+@EndSection 
+
+@Section['Body']
+    <table border="1">
+      <tr>
+        <th>JobID</th>
+        <th>MonitorID</th>
+        <th>Monitor Name</th>
+        <th>Monitor Type</th>
+        <th>StartTime</th>
+        <th>EndTime</th>
+        <th>FinalState</th>
+        <th>Info</th>
+      </tr>
+      <tr>
+        <td>@Model.jobs.JobID</td>
+        <td>@Model.jobs.MonitorID</td>
+        <td>@Model.jobs.Name</td>
+        <td>@Model.jobs.Type</td>
+        <td>@Model.jobs.StartTime</td>
+        <td>@Model.jobs.EndTime</td>
+        <td>@Model.jobs.FinalState</td>
+        <td>@Model.jobs.Info</td>
+      </tr>
+    </table>
+
+    <p><b> Results </b> - Click a row for more information</p>
+    <div id="container">
+        <table id="jobTable" width="100%">
+            <thead>
+                <tr>
+                    <!--<th></th>-->
+                    <th>ID</th>
+                    <!--<th>JobID</th>-->
+                    <!--<th>LogFilename</th>-->
+                    <!--<th>RowNumber</th>-->
+                    <th>date</th>
+                    <th>time</th>
+                    <th>s_ip</th>
+                    <th>cs_method</th>
+                    <th>cs_uri_stem</th>
+                    <!--<th>cs_uri_query</th>-->
+                    <th>s_port</th>
+                    <!--<th>cs_username</th>-->
+                    <!--<th>c_ip</th>-->
+                    <!--<th>cs_User_Agent</th>-->
+                    <th>sc_status</th>
+                    <th>sc_substatus</th>
+                    <!--<th>sc_win32_status</th>-->
+                    <th>time_taken</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+<script type="text/javascript">
+        var oTable; // use a global for the table
+        var anOpen = [];
+
+        $(document).ready(function () {
+            oTable = $('#jobTable').dataTable({
+                "sDom": '<"top"lf>t<"bottom"irp>',
+                "sAjaxSource": "/Job/dt/@Model.jobs.Type/"+ @Model.jobs.JobID + ".json",
+                "bPaginate": true,
+                "bLengthChange": true,
+                "sPaginationType": "full_numbers",
+                "aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "bInfo": true,
+                "aoColumns": [
+                    //{"mDataProp": null, "sClass": "control center","sDefaultContent": '+', "sWidth": "1px"},
+                    { "mData": "IISID", "sTitle": "ID", "sWidth": "5px"},
+                    //{ "mData": "JobID", "sTitle": "Job ID", "sWidth": "5px"},
+                    //{ "mData": "LogFilename", "sTitle": "Log", "sWidth": "450px"},
+                    //{ "mData": "RowNumber", "sTitle": "Line #", "sWidth": "5px"},
+                    { "mData": "date", "sWidth": "15px", "mRender": function (data, type, full) {
+                        return data.replace("00:00:00",""); 
+                    } 
+                    },
+                    { "mData": "time", "sWidth": "15px", "mRender": function (data, type, full) {
+                        return data.replace("01/01/2000",""); 
+                    } 
+                    },
+                    { "mData": "s_ip", "sWidth": "50px"},
+                    { "mData": "cs_method", "sWidth": "25px"},
+                    { "mData": "cs_uri_stem", "sWidth": "100px"},
+                    //{ "mData": "cs_uri_query", "sWidth": "100px"},
+                    { "mData": "s_port", "sWidth": "10px"},
+                    //{ "mData": "cs_username", "sWidth": "20px"},
+                    //{ "mData": "c_ip", "sWidth": "25px"},
+                    //{ "mData": "cs_User_Agent", "sWidth": "100px"},
+                    { "mData": "sc_status", "sWidth": "20px"},
+                    { "mData": "sc_substatus", "sWidth": "20px"},
+                    //{ "mData": "sc_win32_status", "sWidth": "20px"},
+                    { "mData": "time_taken", "sWidth": "20px" }
+                ]
+            });
+        });
+
+        /*
+        $('#jobTable td.control').live( 'click', function () {
+            var nTr = this.parentNode;
+            var i = $.inArray( nTr, anOpen );
+    
+            if ( i === -1 ) {
+                $(this).text("-");
+                var nDetailsRow = oTable.fnOpen( nTr, fnFormatDetails(oTable, nTr), 'details' );
+                $('div.innerDetails', nDetailsRow).slideDown();
+                anOpen.push( nTr );
+            }
+            else {
+                $(this).text("+");
+                $('div.innerDetails', $(nTr).next()[0]).slideUp( function () {
+                  oTable.fnClose( nTr );
+                  anOpen.splice( i, 1 );
+                } );
+            }
+        });//*/
+
+        $('#jobTable tbody tr').live( 'click', function () {
+
+            var nTr = this;
+            var i = $.inArray( nTr, anOpen );
+
+            if ( i === -1 ) {
+            $(this).addClass('row_selected');
+            var nDetailsRow = oTable.fnOpen( nTr, fnFormatDetails(oTable, nTr), 'details' );
+            $('div.innerDetails', nDetailsRow).slideDown();
+            anOpen.push( nTr );
+            }
+            else {
+            $(this).removeClass('row_selected');
+            $('div.innerDetails', $(nTr).next()[0]).slideUp( function () {
+            oTable.fnClose( nTr );
+            anOpen.splice( i, 1 );
+            } );
+
+            }
+        } );
+
+        function fnFormatDetails( oTable, nTr )
+        {
+          var oData = oTable.fnGetData( nTr );
+
+          var LogFilename = (oData.LogFilename) ? oData.LogFilename : "&nbsp;";
+          var RowNumber = (oData.RowNumber) ? oData.RowNumber : "&nbsp;";
+          var cs_uri_query = (oData.cs_uri_query) ? oData.cs_uri_query : "&nbsp;";
+          var cs_username = (oData.cs_username) ? oData.cs_username : "&nbsp;";
+          var cs_User_Agent = (oData.cs_User_Agent) ? oData.cs_User_Agent : "&nbsp;";
+          var sc_win32_status = (oData.sc_win32_status) ? sc_win32_status : "&nbsp;";
+
+          var sOut =
+            '<div class="innerDetails" style="padding-left:50px;">'+
+              '<table cellpadding="5" cellspacing="0" border="1" style="padding-left:0px;">'+
+                '<tr><td>Log File Name:</td><td>'+ LogFilename +'</td><td>Row:</td><td>'+RowNumber+'</td></tr>'+
+                '<tr><td>cs_uri_query:</td><td COLSPAN="3">'+cs_uri_query+'</td></tr>'+
+                '<tr><td>cs_username:</td><td>'+cs_username+'</td><td>c_ip:</td><td>'+oData.c_ip+'</td></tr>'+
+                '<tr><td>cs_User_Agent:</td><td COLSPAN="3">'+cs_User_Agent+'</td></tr>'+
+                '<tr><td>sc_win32_status:</td><td COLSPAN="3">'+sc_win32_status+'</td></tr>'+
+              '</table>'+
+            '</div>';
+          return sOut;
+        }
+
+</script>
+@EndSection

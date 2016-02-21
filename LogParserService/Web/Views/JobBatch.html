@@ -1,0 +1,102 @@
+﻿@Master['Web\\Views\\Master-DataTable.html']
+
+@Section['Title']
+Jobs
+@EndSection
+
+@Section['AdditionalStyle']
+<style type="text/css" title="currentStyle">
+    #container 
+    {
+        padding: 0;
+        width: 1025px;
+    }
+    table.dataTable td.details
+    {
+        border: 0;
+        padding: 5px;
+        background-color: #F5F5F5;
+    }
+    div.innerDetails
+    {
+        display: none;
+    }
+    .top, .bottom 
+    {
+        background-color: #F5F5F5;
+        border: 1px solid #CCCCCC;
+        padding: 25px;
+    }
+</style>
+@EndSection
+
+
+@Section['Body']
+<hr />
+    <table border="1">
+      <tr>
+        <th>Job ID</th>
+        <th>Monitor ID</th>
+        <th>Monitor Name</th>
+        <th>Monitor Type</th>
+        <th>StartTime</th>
+        <th>EndTime</th>
+        <th>FinalState</th>
+        <th>Info</th>
+      </tr>
+      <tr>
+        <td>@Model.jobs.JobID</td>
+        <td>@Model.jobs.MonitorID</td>
+        <td>@Model.jobs.Name</td>
+        <td>@Model.jobs.Type</td>
+        <td>@Model.jobs.StartTime</td>
+        <td>@Model.jobs.EndTime</td>
+        <td>@Model.jobs.FinalState</td>
+        <td>@Model.jobs.Info</td>
+      </tr>
+    </table>
+    <hr />
+    <div id="container">
+        <TABLE id="jobTable" class="display" border="0" cellSpacing="0" cellPadding="0" width="100%">
+          <thead>
+            <tr>
+                <th width="5px">Job ID</th>
+                <!--<th width="5px">Monitor ID</th>-->
+                <th width="100px">Name</th>
+                <th width="25px">Type</th>
+                <th width="150px">Start Time</th>
+                <th width="150px">End Time</th>
+                <th width="50px">Final State</th>
+                <th width="*">Info</th>
+            </tr>
+          </thead>
+        </TABLE>
+    </div>
+
+    <script type="text/javascript">
+        var oTable; // use a global for the table
+        
+        $(document).ready(function () {
+
+            oTable = $('#jobTable').dataTable({
+                "sAjaxSource": "/Job/dt/"+ @Model.jobs.JobID + ".json",
+                "bInfo": false,
+                "bPaginate": false,
+                "bLengthChange": false,
+				"bFilter": false,
+				"bProcessing": true,
+                "aoColumns": [
+                    { "mData": "JobID", "sTitle": "Job ID" },
+                    //{ "mData": "MonitorID", "sTitle": "Monitor ID" },
+                    { "mData": "Name" },
+                    { "mData": "Type" },
+                    { "mData": "StartTime", "sTitle": "Start Time" },
+                    { "mData": "EndTime", "sTitle": "End Time" },
+                    { "mData": "FinalState", "sTitle": "Final State" },
+                    { "mData": "Info" }
+                ]
+            });
+
+        });
+    </script>
+@EndSection

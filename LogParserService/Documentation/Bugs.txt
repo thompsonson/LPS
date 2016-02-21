@@ -1,0 +1,8 @@
+﻿
+[BUG] Interval is updated each time the monitor is saved - should keep the interval the same unless it is changed.
+
+
+
+[RESOLVED] Checkpoint isn't unique - will cause problems if multiple monitors have a reference to the same file [each monitor runs in our folder]
+[RESOLVED] Noticed that a (IIS) monitor gets "stuck" in a running state. Possible edited on the web whilst it is in a running state. DONE: ignore state when saving a montior from web
+[RESOLVED] Editing a Monitor whilst it is running saves the state the as running, which may not also be the case.

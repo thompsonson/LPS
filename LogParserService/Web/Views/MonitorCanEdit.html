@@ -1,0 +1,383 @@
+﻿@Master['Web\\Views\\Master-DataTable.html']
+
+@Section['Title']
+Monitors
+@EndSection
+
+@Section['AdditionalScript']
+
+    <!-- jQuery.Hotkeys -->
+    <script type="text/javascript" charset="utf8" src="/js/jQuery.Hotkeys.js"></script>
+    <script type="text/javascript" charset="utf8" src="/js/jquery.validationEngine-en.js"></script>
+    <script type="text/javascript" charset="utf8" src="/js/jquery.validationEngine.js"></script>
+
+@EndSection
+
+@Section['AdditionalStyle']
+
+<link rel="stylesheet" href="css/validationEngine.jquery.css" type="text/css"/>
+
+<style type="text/css">
+         
+    #container {
+        padding-top: 60px !important;
+        width: 960px !important;
+    }
+    #dt_example .big {
+        font-size: 1.3em;
+        line-height: 1.45em;
+        color: #111;
+        margin-left: -10px;
+        margin-right: -10px;
+        font-weight: normal;
+    }
+    #dt_example {
+        font: 95%/1.45em "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+        color: #111;
+    }
+    div.dataTables_wrapper, table {
+        font: 13px/1.45em "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+    }
+    #dt_example h1 {
+        font-size: 16px !important;
+        color: #111;
+    }
+    #footer {
+        line-height: 1.45em;
+    }
+    div.examples {
+        padding-top: 1em !important;
+    }
+    div.examples ul {
+        padding-top: 1em !important;
+        padding-left: 1em !important;
+        color: #111;
+    }
+</style>
+@EndSection
+
+
+@Section['Body']
+
+    <p><a id="new" href="">New Monitor</a></p>
+    
+    <div id="dialog_box" style="display: none;">
+        Really delete?
+    </div>
+    
+    <TABLE id="example" class="display" border="0" cellSpacing="0" cellPadding="0" width="100%">
+      <thead>
+        <tr>
+            <th width="5">MonitorID</th>
+            <th width="100">Name</th>
+            <th width="200">Description</th>
+            <th width="10">Run Interval</th>
+            <th width="*">SQL</th>
+            <th width="50">Type</th>
+            <th width="40">State</th>
+            <th width="10">Run Multiple</th>
+            <th width="10">Active</th>
+            <th width="10">Alert</th>
+            <th width="100">Email</th>
+            <th width="100">Checkpoint</th>
+            <th width="120">Action</th>
+        </tr>
+      </thead>
+    </TABLE>
+
+    <script type="text/javascript">
+        var oTable; // use a global for the table
+        var oTypes = ['Eventvwr', 'IIS'];
+        var nEditing = null;
+
+        function editRow(oTable, nRow) {
+
+            // TODO: move this to table config and toggle row between display and edit mode
+            var aData = oTable.fnGetData(nRow);
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = jqTds[0].innerHTML + '<input name="MonitorID" value="' + aData.MonitorID + '" type="hidden">';
+            var strName = (aData.Name) ? aData.Name : ""
+            jqTds[1].innerHTML = '<input name="Name" class="validate[required]" value="' + strName + '" type="text">';
+            var strDescription = (aData.Description) ? aData.Description : ""
+            jqTds[2].innerHTML = '<input name="Description" value="' + strDescription + '" type="text">';
+            jqTds[3].innerHTML = '<input name="RunInterval" class="validate[required,min[30]]" value="' + aData.RunInterval + '" type="text">';
+            var strSQL = (aData.SQL) ? aData.SQL : ""
+            jqTds[4].innerHTML = '<input size="80" name="SQL" class="validate[required,custom[logParserQuery]]" value="' + strSQL + '" type="text">';
+            // State is not editable from the UI
+            // Run Multiple and Active are already checkboxes, as is Alert 
+            var strEmailAddresses = (aData.EmailAddresses) ? aData.EmailAddresses : ""
+            jqTds[10].innerHTML = '<input class="validate[custom[email]]" name="EmailAddresses" value="' + strEmailAddresses + '" type="text">';
+            var strCheckpoint = (aData.Checkpoint) ? aData.Checkpoint : ""
+            jqTds[11].innerHTML = '<input name="Checkpoint" value="' + strCheckpoint + '" type="text">';
+            jqTds[12].innerHTML = '<a class="edit" href="">Save</a> | <a class="edit" href="">Cancel</a> ';
+
+            // set up the hotkeys (Escape and Return for Cancel and Save)
+            $("input", jqTds).bind('keyup', 'esc', handleEscKeyup);
+            $("select", document).bind('keyup', 'esc', handleEscKeyup);
+            $(document).bind('keyup', 'esc', handleEscKeyup);
+
+            // now return
+            $("input", jqTds).bind('keyup', 'return', handleReturnKeyup);
+            $("select", document).bind('keyup', 'return', handleReturnKeyup);
+            $(document).bind('keyup', 'return', handleReturnKeyup);
+
+            // set the onblur check for each tag requiring validation
+            var jqValidate = $('[class^="validate"]', nRow);
+            //console.log(jqValidate);
+            jqValidate.each(function (i) {
+                $(this).blur(function () {
+                    $(this).validationEngine('validate');
+                });
+            });
+            
+            $("input[type='text']:first", jqTds[1]).focus();
+        }
+
+        function handleEscKeyup(evt) {
+            editRowHandler(nEditing, "Cancel");
+        }
+
+        function handleReturnKeyup(evt) {
+            editRowHandler(nEditing, "Save");
+        }
+
+        function saveRow(oTable, nRow) {
+
+            var formInvalid = false;
+            // check each value in the row
+            var jqValidate = $('[class^="validate"]', nRow);
+            //console.log(jqValidate);
+            jqValidate.each(function (i) {
+                if ($(this).validationEngine('validate')) {
+                    /*console.log("------------------------");
+                    console.log($(this).attr('name'));
+                    console.log($(this).attr('class'));
+                    console.log("not valid"); */
+                    formInvalid = true;
+                } // else { console.log("valid"); }
+            }); 
+
+            if (formInvalid) {
+                //alert("The details are invalid please correct the marked inputs");
+            } else {
+                var jqInputs = $('input', nRow);
+                // quick and dirty way to populate a json object with the values
+                var json = {};
+                var i = 0;
+                // form tags have to set their value when they change for this to work
+                jqInputs.each(function (i) { json[jqInputs[i].name] = jqInputs[i++].value });
+                var jqSelects = $('select', nRow);
+                jqSelects.each(function (i) { json[jqSelects[i].id] = jqSelects[i].value; });
+                // XHR POST to save the edit - then refresh the table is successfull
+                var jqxhr = $.post("/write/monitor/dt/edit", json)
+                    .done(function (data) {
+                        if (data.success) {
+                            oTable.fnReloadAjax();
+                            nEditing = null;
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .fail(function (data) {
+                        console.log(data);
+                        alert(data);
+                    })
+                //.always(function () { console.log("complete"); });
+            }
+        }
+
+        function restoreRow(oTable, nRow) {
+            //console.log("restoring Row");
+            var aData = oTable.fnGetData(nRow);
+            oTable.fnUpdate(aData, nRow);
+
+            console.log("unbinding keyup events");
+            var jqTds = $('>td', nRow);
+            // unbind Escape keyup
+            $(document).unbind('keyup', handleEscKeyup);
+            $("select", document).unbind('keyup', handleEscKeyup);
+            $("input", jqTds).unbind('keyup', handleEscKeyup);
+            // unbind the return key up
+            $("input", jqTds).unbind('keyup', handleReturnKeyup);
+            $("select", document).unbind('keyup', handleReturnKeyup);
+            $(document).unbind('keyup', handleReturnKeyup);
+
+            formInvalid = false;
+            nEditing = null;
+        }
+
+
+        function editRowHandler(nRow, linkText) {
+            //console.log("editRowHandler");
+            if (nEditing !== null && nEditing != nRow) {
+                /* A different row is being edited - the edit should be cancelled and this row edited */
+                //console.log("calling restoreRow with " + nEditing);
+                restoreRow(oTable, nEditing);
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            }
+            else if (nEditing == nRow && linkText == "Save") {
+                /* This row is being edited and should be saved */
+                //console.log("Saving the row");
+                saveRow(oTable, nEditing);
+            }
+            else if (nEditing == nRow && linkText == "Cancel") {
+                /* This row is being edited and should be restored */
+                //console.log("Restoring the row");
+                restoreRow(oTable, nEditing);
+            }
+            else if (nEditing == null) {
+                /* No row currently being edited */
+                //console.log("No row is being edited");
+                nEditing = nRow;
+                editRow(oTable, nRow);
+            } else {
+                /* this row is currently being edited */
+                //console.log("this row is currently being edited");
+            }
+        }
+
+
+        $(document).ready(function () {
+
+            oTable = $('#example').dataTable({
+                "sDom": "Tfrtip",
+                "sAjaxSource": "/Monitor/dt.json",
+                "aoColumns": [
+                    { "mData": "MonitorID", "sTitle": "ID" },
+                    { "mData": "Name" },
+                    { "mData": "Description" },
+                    { "mData": "RunInterval", "sTitle": "Run Interval", "sClass": "center" },
+                    { "mData": "SQL", "sClass": "centre" },
+                    { "mData": "Type", "mRender": function (data, type, full) {
+                        var html = '<select id="Type" value="test" onchange="editRowHandler($(this).parents(\'tr\')[0])">';
+
+                        $.each(oTypes, function (i) {
+                            if (oTypes[i] == data) {
+                                html += '<option value="' + oTypes[i] + '" selected="selected">' + oTypes[i] + '</option>'
+                            } else {
+                                html += '<option value="' + oTypes[i] + '">' + oTypes[i] + '</option>'
+                            }
+                        });
+
+                        html += '</select>';
+
+                        return html;
+                    }
+                    },
+                    { "mData": "State", "sClass": "center" },
+                    { "mData": "RunMultiple", "sTitle": "Run Multiple", "sClass": "center", "mRender": function (data, type, full) {
+                        if (data == 1) {
+                            return '<input type="checkbox" name="RunMultiple" value="1" checked onclick="$(this).val(this.checked ? 1 : 0); editRowHandler($(this).parents(\'tr\')[0])">';
+                        } else {
+                            return '<input type="checkbox" name="RunMultiple" value="0" onclick="$(this).val(this.checked ? 1 : 0); editRowHandler($(this).parents(\'tr\')[0])">';
+                        }
+                    }
+                    },
+
+                    { "mData": "Active", "sClass": "center", "mRender": function (data, type, full) {
+                        if (data == 1) {
+                            return '<input type="checkbox" id="Active" name="Active" value="1" checked onclick="$(this).val(this.checked ? 1 : 0); editRowHandler($(this).parents(\'tr\')[0])">';
+                        } else {
+                            return '<input type="checkbox" id="Active" name="Active" value="0" onclick="$(this).val(this.checked ? 1 : 0); editRowHandler($(this).parents(\'tr\')[0])">';
+                        }
+                    }
+                    },
+                    { "mData": "Alert", "sClass": "center", "mRender": function (data, type, full) {
+                        if (data == 1) {
+                            return '<input type="checkbox" id="Alert" name="Alert" value="1" checked onclick="$(this).val(this.checked ? 1 : 0); editRowHandler($(this).parents(\'tr\')[0])">';
+                        } else {
+                            return '<input type="checkbox" id="Alert" name="Alert" value="0" onclick="$(this).val(this.checked ? 1 : 0); editRowHandler($(this).parents(\'tr\')[0])">';
+                        }
+                    }
+                    },
+                    { "mData": "EmailAddresses", "sTitle": "Email", "sClass": "center" },
+                    { "mData": "Checkpoint", "sClass": "center" },
+                    { "mData": null, "sClass": "center", "sDefaultContent": '<a class="edit" href="">Edit</a>|<a class="delete" href="">Delete</a>|<a class="run" href="">Run</a>' }
+                //{"mData": null, "sClass": "center", "mRender": function (data, type, row) { '<a class="edit" id="editMonitor' + row[0] + '" href="">Edit</a>|<a class="delete" id="deleteMonitor' + row[0] + '" href="">Delete</a>|<a class="run" id="runMonitor' + row[0] + '" href="">Run</a>' } }
+                ],
+                "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                    var aData = oTable.fnGetData(nRow);
+                    var editMonitorId = 'editMonitor' + aData.MonitorID;
+                    var deleteMonitorId = 'deleteMonitor' + aData.MonitorID;
+                    var runMonitorId = 'runMonitor' + aData.MonitorID;
+                    $('td:eq(12)>a:eq(0)', nRow).attr('id', editMonitorId);
+                    $('td:eq(12)>a:eq(1)', nRow).attr('id', deleteMonitorId);
+                    $('td:eq(12)>a:eq(2)', nRow).attr('id', runMonitorId);
+                }
+            });
+
+            $('#example a.edit').live('click', function (e) {
+                e.preventDefault();
+
+                /* Get the row as a parent of the link that was clicked on */
+                var nRow = $(this).parents('tr')[0];
+                editRowHandler(nRow, this.innerHTML);
+            });
+
+            $('#example a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                var nRow = $(this).parents('tr')[0];
+                // get the value form the first TD (i.e. the monitor ID)
+                var jqTd = $('td', nRow);
+                console.log(jqTd[0].innerHTML);
+                var json = { "MonitorID": jqTd[0].innerHTML };
+
+                if (confirm("Delete this monitor (ID: " + json.MonitorID + ")?")) {
+                    // AJAX call to delete - then remove from table if successful
+                    var jqxhr = $.post("/write/monitor/dt/delete", json)
+                        .done(function (data) {
+                            oTable.fnDeleteRow(nRow);
+                        })
+                        .fail(function (data) { alert("error"); })
+                    //.always(function () { console.log("complete"); });
+                }
+            });
+
+            $('#example a.run').live('click', function (e) {
+                e.preventDefault();
+                // TODO: AJAX call to run the monitor - refresh the table after
+                // get the row data (inc. monitorID)
+                var nRow = $(this).parents('tr')[0];
+                console.log(nRow);
+                var aData = oTable.fnGetData(nRow);
+                console.log(aData);
+                console.log("/run/monitor/" + aData.MonitorID);
+                var jqxhr = $.get("/run/monitor/" + aData.MonitorID)
+                .done(function (data) {
+                    if (data.success) {
+                        // should refresh the table... (unless it's being edited).
+                        oTable.fnReloadAjax();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .fail(function (data) { alert("error"); console.log(data); })
+            });
+
+            $('#new').click(function (e) {
+                e.preventDefault();
+                // get new ID (and object) from the server
+                var jqxhr = $.post("/write/monitor/dt/new")
+                .done(function (data) {
+                    if (data.success) {
+                        var aiNew = oTable.fnAddData(data.monitor);
+                        var nRow = oTable.fnGetNodes(aiNew[0]);
+                        editRow(oTable, nRow);
+                        nEditing = nRow;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .fail(function (data) { alert("error"); console.log(data); })
+                //.always(function () { console.log("complete"); });
+            });
+
+            //$(document).bind('keypress', 'esc', function () { alert("escape pressed") });
+            //$(document).bind('keydown', 'esc', function () { alert("escape keydown") });
+            //$(document).bind('keyup', 'esc', function () { alert("escape keyup") });
+
+        });
+    </script>
+@EndSection

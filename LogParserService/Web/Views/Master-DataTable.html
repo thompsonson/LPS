@@ -1,0 +1,36 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>
+@Section['Title']        
+        </title>
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css"/>
+
+@Section['AdditionalStyle']
+
+        <!-- jQuery -->
+        <script type="text/javascript" charset="utf8" src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+        <!-- DataTables -->
+        <script type="text/javascript" charset="utf8" src="//ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+
+@Section['AdditionalScript']
+
+<!-- DataTable API additions -->
+<script type="text/javascript" charset="utf8" src="/js/dataTableExt.fnReloadAjax.js"></script>
+<script type="text/javascript" charset="utf8" src="/js/dataTableExt.oSort.js"></script>
+
+	</head>
+	<body>
+    <p><span id="welcome">Welcome @Model.MasterPage.UserName </span> | <a href="/Monitor">Monitors</a> | <a href="/Job">Jobs</a> | <a href="/Config">Config</a> | 
+        @If.MasterPage.IsAuthenticated
+            <a href="/logout">Logout</a>
+        @EndIf
+        @IfNot.MasterPage.IsAuthenticated
+            <a href="/login">Login</a>
+        @EndIf</p>
+        
+@Section['Body']
+    
+	</body>
+</html>

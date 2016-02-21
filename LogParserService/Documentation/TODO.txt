@@ -1,0 +1,23 @@
+﻿
+[TODO] Unit tests\General tests
+		[TODO] Log on and create a new monitor
+		[TODO] Confirm Jobs are running
+		[TODO] Confirm Job Details page is returning
+		[DONE] Log in and edit
+		[DONE] log on and confirm edit isn't available for user
+
+[TODO] Monitor page - detailing current state (auto updated?) and job runs
+
+[TODO] User and Group DB 
+[TODO] Alert on Zero flag, enabling a monitor to alert if it doesn't return any rows (change the current alert flg to alert on zero - get an alert state from email being entered)
+[TODO] update_user and create_user on the Monitor table
+
+[TODO] config class with ability to change from web interface
+
+
+[DONE] Logparser ExecuteBatch method - trigger of "SELECT .* INTO ... " in the SQL
+[DONE] have monitor sub folder with output files and checkpoint file in it - avoid clashes with other monitors.
+[DONE] Run on demand functionality
+[DONE] update_ts and create_ts on the Monitor and Job tables.
+[DONE] form validation https://github.com/posabsolute/jQuery-Validation-Engine
+

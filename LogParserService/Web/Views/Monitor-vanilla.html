@@ -1,0 +1,62 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>Monitors</title>
+	</head>
+	<body>
+
+    <form name="add-event" method="post" action="/Monitor/add">
+      <label>Name: </label>
+      <input type="text" name="Name" />
+      <br/>
+      <label>Description: </label>
+      <input type="text" name="Description" />
+      <br/>
+      <label>Active: </label>
+      <input type="checkbox" name="Active" value="true" />
+      <br/>
+      <input type="submit" value="add"/>
+    </form>
+
+    <table border="1">
+      <tr>
+        <th>MonitorID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>RunInterval</th>
+        <th>SQL</th>
+        <th>Type</th>
+        <th>State</th>
+        <th>RunMultiple</th>
+        <th>Active</th>
+        <th>Checkpoint</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+      </tr>
+      @Each
+      <tr>
+        <td>@Current.MonitorID</td>
+        <td>@Current.Name</td>
+        <td>@Current.Description</td>
+        <td>@Current.RunInterval</td>
+        <td>@Current.SQL</td>
+        <td>@Current.Type</td>
+        <td>@Current.State</td>
+        <td>@Current.RunMultiple</td>
+        <td>@Current.RunMultiple</td>
+        <td>@Current.Checkpoint</td>
+        <td>
+          <a href="/Monitor/run/@Current.ID">run</a>
+        </td>
+        <td>
+          <a href="/Monitor/edit/@Current.ID">edit</a>
+        </td>
+        <td>
+          <a href="/Monitor/delete/@Current.ID">delete</a>
+        </td>
+      </tr>
+      @EndEach
+    </table>
+	</body>
+</html>
